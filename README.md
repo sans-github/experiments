@@ -1,83 +1,62 @@
-# Onsemble<>DistributionCenter
-## Bulk catalog ingestion
-```mermaid 
+## Contractor journey
+```mermaid
 ---
-title: Entire catalog ingestion - one time
+title: Contractor journey
 ---
-    sequenceDiagram
-      DistributionCenter->>+OnsembleCatalog: Onboard catalog data
-       Note over DistributionCenter,OnsembleCatalog: Batch process, async process
+      flowchart TB
+        Contractor(Contractor)
+        subgraph Discovery
+          Project(Project)
+          OnsCatalog(Ons Catalog)
+          OnsQuoteSystem(Ons Quote system)
+        end
+        subgraph Checkout
+          OnsCart(Ons Cart)
+          CheckoutNode(Ons Checkout)
+          Store(Store)
+        end
+        Contractor -->|Review requirements| Project
+        Contractor -->|Search and Browse| OnsCatalog
+        Contractor -->|Prepare Quotes| OnsQuoteSystem
+        OnsQuoteSystem -->|Customer reviews and approves quote| OnsCart
+        OnsCart --> CheckoutNode
+        Contractor -->|Pay and Pick up| Store
 ```
 
-## Add a new item
+## Catalog management
 ```mermaid 
----
-title: As new item arrives
----
     sequenceDiagram
-      DistributionCenter->>+OnsembleCatalog: Add a new item
-       Note over DistributionCenter,OnsembleCatalog: API
+      rect rgb(200, 220, 255)
+        Note over DC,Ons Catalog: Onboard entire catalog
+        DC->>+Ons Catalog: Async batch process<br/>(1-time)
+      end
+      rect rgb(220, 255, 200)
+        Note over DC,Ons Catalog: Add new, update/delete existing
+        DC->>+Ons Catalog: API Call<br/>(ongoing)
+      end
+      rect rgb(238, 200, 255)
+        Note over DC,Ons Inventory: Price and availability (For search/browse)
+        DC->>+Ons Inventory: API Call<br/>(ongoing)
+      end
 ```
-
-## Update existing item
+## Order placement flow
 ```mermaid 
 ---
-title: Update an item or discontinue
----
-    sequenceDiagram
-      DistributionCenter->>+OnsembleCatalog: Update existing item
-       Note over DistributionCenter,OnsembleCatalog: API call
-```
-
-## Track price and availability
-```mermaid 
----
-title: Price and availability updates
----
-    sequenceDiagram
-      DistributionCenter->>+OnsembleInvetory: Update price and availability
-       Note over DistributionCenter,OnsembleInvetory: API call, For search and Browse
-```
-## Lock in price and availability
-```mermaid 
----
-title: Price and availability updates
+title: Order placement flow
 ---
     sequenceDiagram
       participant Contractor
-      participant Onsemble
-      participant DistributionCenter
-      Contractor->>+ Onsemble: Place order
-      Onsemble->>DistributionCenter: Get price and availability
-      DistributionCenter-->>Onsemble: Price and availability
-      Onsemble->>DistributionCenter: Deduct item in inventory
-      Onsemble ->>Onsemble:Place order
-      Onsemble ->>-Contractor: Confirm order
-```
-
-
-# Onsemble<>customer
-## Order journey
-```mermaid
----
-title: Order journey
----
-    flowchart TB
-      Contractor(Contractor)
-      subgraph Discovery
-        Project(Project)
-        OnsembleCatalog(Onsemble Catalog)
-        OnsembleQuoteSystem(Onsemble Quote system)
+      participant Ons
+      participant DC
+      rect rgb(201, 217, 244)
+        Note over Contractor,DC: Order flow
+        Contractor->> Ons: Confirm a quote
+        Ons ->>Ons:Quote to cart
+        Contractor->>+ Ons: Place order
+        Ons->>DC: Price and availability?
+        DC-->>Ons: Price and availability
+        Ons->>DC: Update DC
+        Ons ->>Ons:Place order
+        Ons ->>-Contractor: Confirm order
       end
-      subgraph Checkout
-        OnsembleCart(Onsemble Cart)
-        CheckoutNode(Onsemble Checkout)
-        Store(Store)
-      end
-      Contractor -->|Review requirements| Project
-      Contractor -->|Search and Browse| OnsembleCatalog
-      Contractor -->|Prepare Quotes| OnsembleQuoteSystem
-      OnsembleQuoteSystem -->|Customer reviews and approves quote| OnsembleCart
-      OnsembleCart --> CheckoutNode
-      Contractor -->|Pick up item| Store
 ```
